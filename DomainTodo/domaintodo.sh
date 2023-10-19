@@ -41,10 +41,13 @@ if [ ! -f "$input_file" ]; then
 fi
 
 # Use grep and cut to extract domain names and store them in an array
-mapfile -t domain_names < <(grep -o 'of domain \([^ ]\+\)' "$input_file" | cut -d ' ' -f 3)
+mapfile -t of_domain_names < <(grep -o 'of domain \([^ ]\+\)' "$input_file" | cut -d ' ' -f 3)
+mapfile -t of_the_domain_names < <(grep -oP 'of the domain \K[^<]+' "$input_file")
+
+domain_names=("${of_domain_names[@]}" "${of_the_domain_names[@]}")
 
 # Iterate through the domain names and run whois for each
-printf "%-2s %-23s %-13s %-25s %s\n" "SN" "Domain Name" "Expiry Date" "Registrar" "Status"
+printf "%-2s %-30s %-12s %-25s %s\n" "SN" "Domain Name" "Expiry Date" "Registrar" "Status"
 SN=1
 for domain in "${domain_names[@]}"; do
   domain="${domain#"${domain%%[![:space:]]*}"}"
@@ -65,7 +68,8 @@ for domain in "${domain_names[@]}"; do
   domain_registrar="${domain_registrar#"${domain_registrar%%[![:space:]]*}"}"
   domain_registrar="${domain_registrar%"${domain_registar##*[![:space:]]}"}"
 
-  printf "%-2s %-23s %-13s %-25s %s\n" "$SN" "$domain" "$domain_expiry" "$domain_registrar" "$domain_status"
+
+  printf "%-2s %-30s %-12s %-25s %s\n" "$SN" "$domain" "$domain_expiry" "$domain_registrar" "$domain_status"
  SN=$((SN + 1)) 
 done
 
