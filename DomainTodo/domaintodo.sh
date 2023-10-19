@@ -44,7 +44,7 @@ fi
 mapfile -t domain_names < <(grep -o 'of domain \([^ ]\+\)' "$input_file" | cut -d ' ' -f 3)
 
 # Iterate through the domain names and run whois for each
-printf "%-5s %-30s %-15s %s\n" "SN" "Domain Name" "Expiry Date" "Status"
+printf "%-2s %-23s %-13s %-25s %s\n" "SN" "Domain Name" "Expiry Date" "Registrar" "Status"
 SN=1
 for domain in "${domain_names[@]}"; do
   domain="${domain#"${domain%%[![:space:]]*}"}"
@@ -61,7 +61,11 @@ for domain in "${domain_names[@]}"; do
   domain_status="${domain_status#"${domain_status%%[![:space:]]*}"}"
   domain_status="${domain_status%"${domain_status##*[![:space:]]}"}"
 
-  printf "%-5s %-30s %-15s %s\n" "$SN" "$domain" "$domain_expiry" "$domain_status"
+  domain_registrar=$(grep "Registrar: " <<< "$domain_info" | awk '{sub("Registrar: ", ""); print}' | head -n 1 | cut -c -25)
+  domain_registrar="${domain_registrar#"${domain_registrar%%[![:space:]]*}"}"
+  domain_registrar="${domain_registrar%"${domain_registar##*[![:space:]]}"}"
+
+  printf "%-2s %-23s %-13s %-25s %s\n" "$SN" "$domain" "$domain_expiry" "$domain_registrar" "$domain_status"
  SN=$((SN + 1)) 
 done
 
