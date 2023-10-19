@@ -42,10 +42,10 @@ fi
 
 # Use grep and cut to extract domain names and store them in an array
 mapfile -t domain_names < <(grep -o 'of domain \([^ ]\+\)' "$input_file" | cut -d ' ' -f 3)
-#domain_names=($(grep -o 'of domain \([^ ]\+\)' "$input_file" | cut -d ' ' -f 3))
 
 # Iterate through the domain names and run whois for each
-printf "%-30s %-18s %s\n" "Domain Name" "Expiry Date" "Status"
+printf "%-5s %-30s %-15s %s\n" "SN" "Domain Name" "Expiry Date" "Status"
+SN=1
 for domain in "${domain_names[@]}"; do
   domain="${domain#"${domain%%[![:space:]]*}"}"
   domain="${domain%"${domain##*[![:space:]]}"}"
@@ -61,6 +61,7 @@ for domain in "${domain_names[@]}"; do
   domain_status="${domain_status#"${domain_status%%[![:space:]]*}"}"
   domain_status="${domain_status%"${domain_status##*[![:space:]]}"}"
 
-  printf "%-30s %-18s %s\n" "$domain" "$domain_expiry" "$domain_status"
+  printf "%-5s %-30s %-15s %s\n" "$SN" "$domain" "$domain_expiry" "$domain_status"
+ SN=$((SN + 1)) 
 done
 
